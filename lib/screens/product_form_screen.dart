@@ -123,21 +123,36 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                 key: _formKey,
                 child: ListView(
                   shrinkWrap: true,
+                  padding: EdgeInsets.all(4.0),
                   children: [
                     TextFormField(
                       controller: _nameController,
-                      decoration: InputDecoration(labelText: 'Nom'),
-                      validator: (value) => value == null || value.isEmpty
-                          ? 'Champ requis'
-                          : null,
+                      decoration: InputDecoration(
+                        labelText: 'Nom',
+                        filled: true,
+                        border: OutlineInputBorder(),
+                      ),
+                      validator: (value) =>
+                      value == null || value.isEmpty ? 'Champ requis' : null,
                     ),
+                    SizedBox(height: 12),
                     TextFormField(
                       controller: _descriptionController,
-                      decoration: InputDecoration(labelText: 'Description'),
+                      decoration: InputDecoration(
+                        labelText: 'Description',
+                        filled: true,
+                        border: OutlineInputBorder(),
+                      ),
+                      maxLines: 3,
                     ),
+                    SizedBox(height: 12),
                     TextFormField(
                       controller: _priceController,
-                      decoration: InputDecoration(labelText: 'Prix'),
+                      decoration: InputDecoration(
+                        labelText: 'Prix',
+                        filled: true,
+                        border: OutlineInputBorder(),
+                      ),
                       keyboardType: TextInputType.number,
                       validator: (value) {
                         if (value == null || value.isEmpty) return 'Champ requis';
@@ -146,32 +161,52 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                         return null;
                       },
                     ),
+                    SizedBox(height: 12),
                     TextFormField(
                       controller: _imageController,
-                      decoration: InputDecoration(labelText: 'URL de l’image'),
+                      decoration: InputDecoration(
+                        labelText: 'URL de l’image',
+                        filled: true,
+                        border: OutlineInputBorder(),
+                      ),
                       validator: (value) =>
                       value == null || value.isEmpty ? 'Champ requis' : null,
                     ),
-                    SizedBox(height: 10),
-                    AspectRatio(
+                    SizedBox(height: 20),
+                    Divider(),
+                    _imageController.text.isEmpty
+                        ? Container(
+                          height: 48,
+                          alignment: Alignment.center,
+                          child: Text('Aperçu de l’image'),
+                        )
+                        : AspectRatio(
                       aspectRatio: 1.5,
-                      child: _imageController.text.isEmpty
-                          ? Center(child: Text('Aperçu de l’image'))
-                          : Image.network(
-                        _imageController.text,
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) =>
-                            Center(child: Text('URL invalide')),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: Image.network(
+                          _imageController.text,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) => Center(child: Text('URL invalide')),
+                        ),
                       ),
                     ),
-
-                    SizedBox(height: 20),
-                    ElevatedButton(
-                      onPressed: _submit,
-                      child: Text(_isEditing ? 'Mettre à jour' : 'Créer'),
+                    SizedBox(height: 24),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton.icon(
+                        icon: Icon(_isEditing ? Icons.save : Icons.add),
+                        label: Text(_isEditing ? 'Mettre à jour' : 'Créer'),
+                        onPressed: _submit,
+                        style: ElevatedButton.styleFrom(
+                          padding: EdgeInsets.symmetric(vertical: 14),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                        ),
+                      ),
                     ),
                   ],
                 ),
+
               ),
             ),
           ),
