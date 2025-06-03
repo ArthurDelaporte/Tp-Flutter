@@ -27,7 +27,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
 
   void _onSearchChanged() {
     if (_debounce?.isActive ?? false) _debounce!.cancel();
-    _debounce = Timer(const Duration(milliseconds: 500), () {
+    _debounce = Timer(Duration(milliseconds: 500), () {
       setState(() {
         _products = _service.fetchProducts(search: _searchController.text);
       });
@@ -45,12 +45,12 @@ class _ProductListScreenState extends State<ProductListScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Confirmer la suppression'),
+        title: Text('Confirmer la suppression'),
         content: Text('Supprimer le produit "${product.name}" ?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Annuler'),
+            child: Text('Annuler'),
           ),
           TextButton(
             onPressed: () async {
@@ -60,10 +60,10 @@ class _ProductListScreenState extends State<ProductListScreen> {
                 _products = _service.fetchProducts();
               });
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Produit supprimé')),
+                SnackBar(content: Text('Produit supprimé')),
               );
             },
-            child: const Text('Supprimer'),
+            child: Text('Supprimer'),
           ),
         ],
       ),
@@ -74,15 +74,15 @@ class _ProductListScreenState extends State<ProductListScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Produits'),
+        title: Text('Produits'),
       ),
       body: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.all(8.0),
+            padding: EdgeInsets.all(8.0),
             child: TextField(
               controller: _searchController,
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 labelText: 'Rechercher',
                 prefixIcon: Icon(Icons.search),
               ),
@@ -93,31 +93,68 @@ class _ProductListScreenState extends State<ProductListScreen> {
               future: _products,
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
+                  return Center(child: CircularProgressIndicator());
                 } else if (snapshot.hasError) {
                   return Center(child: Text('Erreur: ${snapshot.error}'));
                 } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return const Center(child: Text('Aucun produit trouvé'));
+                  return Center(child: Text('Aucun produit trouvé'));
                 } else {
                   final products = snapshot.data!;
-                  return ListView.builder(
+                  return GridView.builder(
+                    padding: EdgeInsets.all(10),
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: MediaQuery.of(context).size.width > 800
+                          ? 4
+                          : MediaQuery.of(context).size.width > 600
+                          ? 3
+                          : 2,
+                      childAspectRatio: 0.75,
+                      crossAxisSpacing: 10,
+                      mainAxisSpacing: 10,
+                    ),
                     itemCount: products.length,
                     itemBuilder: (context, index) {
                       final product = products[index];
-                      return ListTile(
-                        leading: Image.network(
-                          product.image,
-                          width: 50,
-                          height: 50,
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) => const Icon(Icons.image),
-                        ),
-                        title: Text(product.name),
-                        subtitle: Text('${product.price.toStringAsFixed(2)} €'),
+                      return GestureDetector(
                         onTap: () => context.go('/edit/${product.id}'),
-                        trailing: IconButton(
-                          icon: const Icon(Icons.delete, color: Colors.red),
-                          onPressed: () => _confirmDelete(product),
+                        child: Card(
+                          elevation: 4,
+                          clipBehavior: Clip.antiAlias,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              Expanded(
+                                child: Image.network(
+                                  product.image,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) => Icon(Icons.broken_image),
+                                ),
+                              ),
+                              Padding(
+                                padding: EdgeInsets.all(8),
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(product.name, style: Theme.of(context).textTheme.titleMedium),
+                                          SizedBox(height: 4),
+                                          Text('${product.price.toStringAsFixed(2)} €'),
+                                        ],
+                                      ),
+                                    ),
+                                    IconButton(
+                                      icon: Icon(Icons.delete, color: Colors.red),
+                                      onPressed: () => _confirmDelete(product),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       );
                     },
@@ -130,7 +167,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => context.go('/create'),
-        child: const Icon(Icons.add),
+        child: Icon(Icons.add),
       ),
     );
   }

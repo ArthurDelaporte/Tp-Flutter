@@ -42,7 +42,7 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
       final products = await _service.fetchProducts();
       _product = products.firstWhere((p) => p.id == widget.id);
       _nameController.text = _product.name;
-      _descriptionController.text = _product.description!;
+      _descriptionController.text = _product.description ?? '';
       _priceController.text = _product.price.toString();
       _imageController.text = _product.image;
     } catch (e) {
@@ -61,7 +61,9 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
     final product = Product(
       id: widget.id ?? '',
       name: _nameController.text,
-      description: _descriptionController.text,
+      description: _descriptionController.text.isEmpty
+          ? null
+          : _descriptionController.text,
       price: double.parse(_priceController.text),
       image: _imageController.text,
     );
@@ -72,12 +74,12 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
       if (_isEditing) {
         await _service.updateProduct(product);
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Produit mis à jour')),
+          SnackBar(content: Text('Produit mis à jour')),
         );
       } else {
         await _service.createProduct(product);
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Produit créé')),
+          SnackBar(content: Text('Produit créé')),
         );
       }
       context.go('/');
@@ -97,50 +99,66 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(_isEditing ? 'Modifier un produit' : 'Ajouter un produit'),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () => context.go('/'),
+        ),
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: ListView(
-            children: [
-              TextFormField(
-                controller: _nameController,
-                decoration: const InputDecoration(labelText: 'Nom'),
-                validator: (value) =>
-                value == null || value.isEmpty ? 'Champ requis' : null,
+          ? Center(child: CircularProgressIndicator())
+          : Center(
+        child: ConstrainedBox(
+          constraints: BoxConstraints(maxWidth: 600),
+          child: Card(
+            margin: EdgeInsets.all(16),
+            elevation: 4,
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16)),
+            child: Padding(
+              padding: EdgeInsets.all(16.0),
+              child: Form(
+                key: _formKey,
+                child: ListView(
+                  shrinkWrap: true,
+                  children: [
+                    TextFormField(
+                      controller: _nameController,
+                      decoration: InputDecoration(labelText: 'Nom'),
+                      validator: (value) => value == null || value.isEmpty
+                          ? 'Champ requis'
+                          : null,
+                    ),
+                    TextFormField(
+                      controller: _descriptionController,
+                      decoration: InputDecoration(labelText: 'Description'),
+                    ),
+                    TextFormField(
+                      controller: _priceController,
+                      decoration: InputDecoration(labelText: 'Prix'),
+                      keyboardType: TextInputType.number,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) return 'Champ requis';
+                        final price = double.tryParse(value);
+                        if (price == null || price <= 0) return 'Prix invalide';
+                        return null;
+                      },
+                    ),
+                    TextFormField(
+                      controller: _imageController,
+                      decoration: InputDecoration(labelText: 'URL de l’image'),
+                      validator: (value) => value == null || value.isEmpty
+                          ? 'Champ requis'
+                          : null,
+                    ),
+                    SizedBox(height: 20),
+                    ElevatedButton(
+                      onPressed: _submit,
+                      child: Text(_isEditing ? 'Mettre à jour' : 'Créer'),
+                    ),
+                  ],
+                ),
               ),
-              TextFormField(
-                controller: _descriptionController,
-                decoration: const InputDecoration(labelText: 'Description'),
-                validator: (value) =>
-                value == null || value.isEmpty ? 'Champ requis' : null,
-              ),
-              TextFormField(
-                controller: _priceController,
-                decoration: const InputDecoration(labelText: 'Prix'),
-                keyboardType: TextInputType.number,
-                validator: (value) {
-                  if (value == null || value.isEmpty) return 'Champ requis';
-                  final price = double.tryParse(value);
-                  if (price == null || price <= 0) return 'Prix invalide';
-                  return null;
-                },
-              ),
-              TextFormField(
-                controller: _imageController,
-                decoration: const InputDecoration(labelText: 'URL de l’image'),
-                validator: (value) =>
-                value == null || value.isEmpty ? 'Champ requis' : null,
-              ),
-              const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: _submit,
-                child: Text(_isEditing ? 'Mettre à jour' : 'Créer'),
-              ),
-            ],
+            ),
           ),
         ),
       ),

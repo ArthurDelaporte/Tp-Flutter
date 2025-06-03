@@ -14,9 +14,10 @@ class MyApp extends StatelessWidget {
     return MaterialApp.router(
       debugShowCheckedModeBanner: false,
       routerConfig: router,
-      title: 'EEMI TP',
+      title: "AD Supermarket",
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        useMaterial3: true,
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.green),
       ),
     );
   }
