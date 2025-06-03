@@ -117,43 +117,70 @@ class _ProductListScreenState extends State<ProductListScreen> {
                       final product = products[index];
                       return GestureDetector(
                         onTap: () => context.go('/edit/${product.id}'),
-                        child: Card(
-                          elevation: 4,
-                          clipBehavior: Clip.antiAlias,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              Expanded(
-                                child: Image.network(
-                                  product.image,
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (context, error, stackTrace) => Icon(Icons.broken_image),
+                        child: MouseRegion(
+                          cursor: SystemMouseCursors.click,
+                          child: Card(
+                            elevation: 2,
+                            margin: EdgeInsets.zero,
+                            clipBehavior: Clip.antiAlias,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                Expanded(
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
+                                    child: Image.network(
+                                      product.image,
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (context, error, stackTrace) =>
+                                      Icon(Icons.broken_image, size: 60),
+                                    ),
+                                  ),
                                 ),
-                              ),
-                              Padding(
-                                padding: EdgeInsets.all(8),
-                                child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Text(product.name, style: Theme.of(context).textTheme.titleMedium),
-                                          SizedBox(height: 4),
-                                          Text('${product.price.toStringAsFixed(2)} €'),
-                                        ],
+                                Padding(
+                                  padding: EdgeInsets.all(8),
+                                  child: Row(
+                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                    children: [
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              product.name,
+                                              style: Theme.of(context).textTheme.titleMedium,
+                                              maxLines: 2,
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                            SizedBox(height: 4),
+                                            Container(
+                                              padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                              decoration: BoxDecoration(
+                                                color: Colors.green.shade100,
+                                                borderRadius: BorderRadius.circular(4),
+                                              ),
+                                              child: Text(
+                                                '${product.price.toStringAsFixed(2)} €',
+                                                style: TextStyle(
+                                                  color: Colors.green.shade800,
+                                                  fontWeight: FontWeight.w600,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
                                       ),
-                                    ),
-                                    IconButton(
-                                      icon: Icon(Icons.delete, color: Colors.red),
-                                      onPressed: () => _confirmDelete(product),
-                                    ),
-                                  ],
+                                      IconButton(
+                                        icon: Icon(Icons.delete, color: Colors.red),
+                                        tooltip: 'Supprimer',
+                                        onPressed: () => _confirmDelete(product),
+                                      ),
+                                    ],
+                                  ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                         ),
                       );
