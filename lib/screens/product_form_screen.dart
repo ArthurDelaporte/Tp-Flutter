@@ -28,6 +28,9 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
   @override
   void initState() {
     super.initState();
+    _imageController.addListener(() {
+      setState(() {});
+    });
     if (widget.id != null) {
       _isEditing = true;
       _loadProduct();
@@ -146,10 +149,22 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                     TextFormField(
                       controller: _imageController,
                       decoration: InputDecoration(labelText: 'URL de l’image'),
-                      validator: (value) => value == null || value.isEmpty
-                          ? 'Champ requis'
-                          : null,
+                      validator: (value) =>
+                      value == null || value.isEmpty ? 'Champ requis' : null,
                     ),
+                    SizedBox(height: 10),
+                    AspectRatio(
+                      aspectRatio: 1.5,
+                      child: _imageController.text.isEmpty
+                          ? Center(child: Text('Aperçu de l’image'))
+                          : Image.network(
+                        _imageController.text,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) =>
+                            Center(child: Text('URL invalide')),
+                      ),
+                    ),
+
                     SizedBox(height: 20),
                     ElevatedButton(
                       onPressed: _submit,
